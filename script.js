@@ -68,6 +68,8 @@ function checkIfOpenedInTab() {
     document.body.style.height = '100vh';
     document.body.style.maxWidth = '1200px';
     document.body.style.margin = '0 auto';
+    // タブ表示フラグ用のクラスを付与（CSSで幅調整）
+    document.body.classList.add('tab-view');
     
     // ボタンのテキストを変更
     const openInTabBtn = document.getElementById('openInTabBtn');
@@ -77,6 +79,9 @@ function checkIfOpenedInTab() {
       openInTabBtn.style.opacity = '0.6';
       openInTabBtn.style.cursor = 'default';
     }
+  } else {
+    // ポップアップ等の通常表示時はクラスを外す
+    document.body.classList.remove('tab-view');
   }
 }
 

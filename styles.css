@@ -632,3 +632,8 @@ header h1 {
   background: #f0f0f0;
 }
 
+/* タブ表示時：リスト幅を全体の75%にして中央寄せ */
+.tab-view .sections-container {
+  width: 70%;
+  margin: 0 auto;
+}
