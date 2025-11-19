@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TODOリスト</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>📝 TODOリスト</h1>
+      <div class="header-actions">
+        <button id="openInTabBtn" class="btn btn-secondary" title="タブで開く">タブで開く</button>
+        <button id="ganttChartBtn" class="btn btn-secondary" title="ガントチャート表示">📊 ガントチャート</button>
+        <button id="addSectionBtn" class="btn btn-primary">+ セクション追加</button>
+      </div>
+    </header>
+
+    <div id="sectionsContainer" class="sections-container">
+      <!-- セクションがここに動的に追加されます -->
+    </div>
+
+    <!-- TODOアイテムのテンプレート -->
+    <template id="todoItemTemplate">
+      <div class="todo-item">
+        <div class="todo-main" draggable="true">
+          <button class="toggle-children">▶</button>
+          <input type="checkbox" class="todo-checkbox">
+          <div class="todo-content">
+            <div class="todo-text"></div>
+            <input type="text" class="todo-input" style="display: none;">
+          </div>
+          <input type="date" class="todo-date">
+          <div class="todo-actions">
+            <button class="btn-icon add-child" title="サブタスク追加">+</button>
+            <button class="btn-icon make-child" title="サブタスクに変更">⤵️</button>
+            <button class="btn-icon edit-todo" title="編集">✏️</button>
+            <button class="btn-icon delete-todo" title="削除">🗑️</button>
+          </div>
+        </div>
+        <div class="todo-children" style="display: none;">
+          <!-- 子TODOがここに追加されます -->
+        </div>
+      </div>
+    </template>
+
+    <!-- セクションのテンプレート -->
+    <template id="sectionTemplate">
+      <div class="section">
+        <div class="section-header">
+          <input type="text" class="section-title" placeholder="セクション名">
+          <div class="section-actions">
+            <button class="btn-icon delete-section" title="セクション削除">✕</button>
+          </div>
+        </div>
+        <div class="todos-list">
+          <!-- TODOアイテムがここに追加されます -->
+        </div>
+        <button class="add-todo-btn">+ TODO追加</button>
+      </div>
+    </template>
+
+    <!-- 編集モーダル -->
+    <div id="editModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <h3>TODO編集</h3>
+        <textarea id="editTextarea" rows="4" placeholder="テキストを入力（URLは自動的にリンクになります）"></textarea>
+        <div class="modal-actions">
+          <button id="saveEditBtn" class="btn btn-primary">保存</button>
+          <button id="cancelEditBtn" class="btn btn-secondary">キャンセル</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ガントチャートモーダル -->
+    <div id="ganttModal" class="modal" style="display: none;">
+      <div class="modal-content gantt-modal-content">
+        <div class="gantt-header">
+          <h3>📊 ガントチャート</h3>
+          <button id="closeGanttBtn" class="btn-icon close-modal">✕</button>
+        </div>
+        <div id="ganttChart" class="gantt-chart-container">
+          <!-- ガントチャートがここに描画されます -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
