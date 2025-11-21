@@ -400,6 +400,9 @@ function createTodoElement(todo, sectionId, level = 0) {
     // 初期状態で展開
     childrenContainer.style.display = 'block';
     toggleBtn.classList.add('expanded');
+    
+    // 子タスクコンテナにドロップゾーンを設定
+    setupChildrenDropZone(childrenContainer, todo, sectionId);
   } else {
     toggleBtn.classList.add('hidden');
   }
@@ -591,6 +594,85 @@ function setupDropZone(todosList, sectionId) {
   });
 }
 
+// 子タスクコンテナのドロップゾーン設定
+function setupChildrenDropZone(childrenContainer, parentTodo, sectionId) {
+  childrenContainer.addEventListener('dragover', (e) => {
+    // 最後の子タスクの下の空白部分でのみ有効
+    const children = childrenContainer.querySelectorAll(':scope > .todo-item');
+    if (children.length === 0) return;
+    
+    const lastChild = children[children.length - 1];
+    const lastChildRect = lastChild.getBoundingClientRect();
+    const containerRect = childrenContainer.getBoundingClientRect();
+    
+    // 最後の子タスクの下、またはコンテナの下部余白にマウスがある場合
+    // より広い範囲でドロップゾーンとして機能させる
+    if (e.clientY > lastChildRect.bottom - 5) { // 5px前から有効
+      e.preventDefault();
+      e.stopPropagation();
+      childrenContainer.classList.add('drop-zone-below-children');
+    } else {
+      childrenContainer.classList.remove('drop-zone-below-children');
+    }
+  });
+  
+  childrenContainer.addEventListener('dragleave', (e) => {
+    if (!childrenContainer.contains(e.relatedTarget)) {
+      childrenContainer.classList.remove('drop-zone-below-children');
+    }
+  });
+  
+  childrenContainer.addEventListener('drop', (e) => {
+    const hadDropZoneClass = childrenContainer.classList.contains('drop-zone-below-children');
+    childrenContainer.classList.remove('drop-zone-below-children');
+    
+    if (!draggedData || !hadDropZoneClass) return;
+    
+    const children = childrenContainer.querySelectorAll(':scope > .todo-item');
+    if (children.length === 0) return;
+    
+    const lastChild = children[children.length - 1];
+    const lastChildRect = lastChild.getBoundingClientRect();
+    
+    // 最後の子タスクの下にドロップされた場合
+    if (e.clientY > lastChildRect.bottom - 5) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // 親タスクの直後（同じ階層）に移動
+      const section = appData.sections.find(s => s.id === sectionId);
+      if (!section) return;
+      
+      const parentInfo = findTodoInfo(section.todos, parentTodo.id);
+      if (!parentInfo) return;
+      
+      const draggedTodo = draggedData.todo;
+      const draggedInfo = findTodoInfo(section.todos, draggedTodo.id);
+      if (!draggedInfo) return;
+      
+      // 同じ階層でない場合は移動不可
+      if (draggedInfo.array !== parentInfo.array) return;
+      
+      // 親タスクの直後に移動
+      const draggedIndex = draggedInfo.array.findIndex(t => t.id === draggedTodo.id);
+      draggedInfo.array.splice(draggedIndex, 1);
+      
+      let parentIndex = parentInfo.array.findIndex(t => t.id === parentTodo.id);
+      
+      // 削除によってインデックスがずれる場合の調整
+      if (draggedIndex < parentIndex) {
+        parentIndex--;
+      }
+      
+      // 親タスクの直後に挿入
+      parentInfo.array.splice(parentIndex + 1, 0, draggedTodo);
+      
+      saveData();
+      renderSections();
+    }
+  });
+}
+
 // TODOを移動
 function moveTodo(draggedData, targetTodo, targetSectionId, insertBefore) {
   const { todo: draggedTodo, sectionId: sourceSectionId } = draggedData;
@@ -605,6 +687,11 @@ function moveTodo(draggedData, targetTodo, targetSectionId, insertBefore) {
   const targetInfo = findTodoInfo(targetSection.todos, targetTodo.id);
   
   if (!draggedInfo || !targetInfo) return;
+  
+  // 同じ階層（同じ配列）のタスクのみ入れ替え可能
+  if (draggedInfo.array !== targetInfo.array) {
+    return; // 異なる階層への移動は禁止
+  }
   
   // 同じ位置への移動はスキップ
   if (draggedInfo.array === targetInfo.array) {

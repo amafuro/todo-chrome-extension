@@ -116,9 +116,24 @@ header h1 {
 }
 
 .todo-item {
-  margin-bottom: 6px;
+  margin-bottom: 12px;
   border-radius: 6px;
   transition: all 0.2s;
+}
+
+/* ルート階層のタスク間の余白を統一 */
+.todos-list > .todo-item {
+  margin-bottom: 12px;
+}
+
+/* 子タスク内のタスク間の余白 */
+.todo-children > .todo-item {
+  margin-bottom: 6px;
+}
+
+/* 子タスクの最後のアイテムのmargin-bottomをキャンセル */
+.todo-children > .todo-item:last-child {
+  margin-bottom: 0;
 }
 
 .todo-item.dragging {
@@ -245,8 +260,33 @@ header h1 {
 .todo-children {
   margin-left: 32px;
   margin-top: 8px;
+  margin-bottom: -12px; /* 親タスクのmargin-bottomを完全にキャンセル */
   padding-left: 12px;
+  padding-bottom: 12px; /* ドロップゾーンとしての余白 */
   border-left: 2px solid #dee2e6;
+  transition: background-color 0.2s, border-color 0.2s;
+  position: relative; /* 擬似要素用 */
+}
+
+.todo-children.drop-zone-below-children {
+  background-color: #f0f4ff;
+  border-left: 3px solid #667eea;
+  border-bottom: 3px solid #667eea;
+  border-radius: 0 0 6px 6px;
+  padding-bottom: 20px;
+}
+
+/* 子タスクコンテナの下部にドロップゾーンの視覚的ヒント */
+.todo-children.drop-zone-below-children::after {
+  content: '↓ ここにドロップ';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #667eea;
+  font-size: 11px;
+  font-weight: 500;
+  pointer-events: none;
 }
 
 .btn {
